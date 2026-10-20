@@ -102,11 +102,13 @@ migration, and seeds the Okinawa development trip (`okinawa-2026`). Set
 - Change `src/db/schema.ts` only; it is the schema source of truth.
 - Run `npm run db:generate` after a schema change and commit the generated SQL.
 - Run `npm run db:migrate` to apply pending migrations.
-- Run `npm run db:seed` to restore the development trip.
+- Run `npm run db:seed` to initialize the demo trip in an empty development database.
 - Run `npm run db:setup` for a fresh clone.
 
-The seed command is intentionally repeatable: it replaces the demo trip's
-items and candidates through the repository boundary.
+The seed command is repeatable without resetting data: it leaves an existing
+demo ID untouched and refuses databases containing other trips. It is disabled
+when `NODE_ENV=production`. Use a fresh, separate development database; do not
+run database setup against production data or concurrently with application writes.
 
 Copy `.env.example` to `.env` and provide `GEOAPIFY_API_KEY` to enable place
 search. The MapLibre/OpenFreeMap map does not require a key. See
@@ -317,6 +319,42 @@ npm test
 npm run check
 npm run build
 ```
+
+### Codex Cloud / isolated development
+
+Use Node.js 22 (22.12 or newer) and the existing checkout. No Windows, NAS,
+Ollama server, production database, or API key is required for these checks:
+
+```sh
+cd /workspace/tripflow
+export ASTRO_TELEMETRY_DISABLED=1
+npm ci
+npm test -- --maxWorkers=2
+npm run check
+npm run build
+```
+
+The telemetry flag avoids writing Astro's user configuration outside the
+workspace. If another tool still needs a writable configuration directory,
+use a temporary `XDG_CONFIG_HOME`; do not change system directory permissions.
+
+SQLite clients initialize on first database use, not on module import or
+repository construction. Under Vitest (including an inherited production
+`NODE_ENV`) or `NODE_ENV=test`, the default client always uses `:memory:` and
+ignores `DATABASE_URL`. Repository/cache tests inject separate in-memory
+databases with their required migrations. Provider tests use mock responses;
+they do not require live Ollama, Geoapify, or OpenAI services. Live-provider QA
+in `scripts/live-discovery-qa.ts` is separate and is not part of `npm test`.
+
+`src/data/demo-trip.ts` is synthetic test/development seed data, not a real
+itinerary or verified provider result. Public landmark labels support existing
+entity-resolution tests; mock IDs and coordinates are illustrative. `src/data/`
+is explicitly unignored; root `/data/` and other local data directories remain ignored.
+Do not run `db:setup` against existing data merely to run tests: migrations
+still modify the selected database even though seeding preserves existing trips.
+For a fresh local development database, follow the
+database workflow above; external features remain optional and separately
+configured.
 
 Ask TripFlow resolves saved-place titles and deterministic Want to go collection
 references before place-discovery classification. A multi-place scheduling

@@ -1,5 +1,5 @@
 import { and, eq, gt, lt, or } from 'drizzle-orm';
-import { db } from '@/db/client';
+import { getDb, type TripDatabase } from '@/db/client';
 import { candidates, segmentPreferences, tripDayContexts, tripItems, trips } from '@/db/schema';
 import type { TripRepository, TripSnapshot } from './trip-repository';
 import type { DayContext, GroundedPlaceRef } from '@/domain/models';
@@ -17,7 +17,8 @@ const locationValues = (prefix: 'start'|'base'|'end', place: GroundedPlaceRef | 
 const rowFromContext = (context: DayContext) => ({ tripId: context.tripId, date: context.date, ...locationValues('start', context.startLocation), ...locationValues('base', context.baseLocation), ...locationValues('end', context.endLocation), createdAt: context.createdAt, updatedAt: context.updatedAt });
 
 export class SqliteTripRepository implements TripRepository {
-  constructor(private readonly database: typeof db = db) {}
+  constructor(private readonly injectedDatabase?: TripDatabase) {}
+  private get database() { return this.injectedDatabase ?? getDb(); }
   async listTrips() { return this.database.select().from(trips).orderBy(trips.startDate).all(); }
   async createTrip(trip: TripSnapshot['trip']) { this.database.insert(trips).values(trip).run(); }
   async updateTrip(trip: TripSnapshot['trip']) { this.database.transaction((tx) => { tx.update(trips).set(trip).where(eq(trips.id, trip.id)).run(); tx.delete(tripDayContexts).where(and(eq(tripDayContexts.tripId, trip.id), or(lt(tripDayContexts.date, trip.startDate), gt(tripDayContexts.date, trip.endDate)))).run(); }); }

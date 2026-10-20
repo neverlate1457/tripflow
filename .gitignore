@@ -11,6 +11,7 @@ coverage/
 
 # Local data
 data/
+!src/data/
 
 # Database
 *.db
