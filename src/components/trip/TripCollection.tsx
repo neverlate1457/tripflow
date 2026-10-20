@@ -1,0 +1,13 @@
+import { CalendarDays, ChevronRight, MapPin, Trash2 } from "lucide-react";
+import type { Trip } from "@/domain/models";
+import { tripDurationDays, tripHref } from "@/domain/home-trips";
+
+const destinationLabel = (trip: Trip) => trip.destination?.formattedAddress ?? trip.destination?.name ?? null;
+
+export function TripGrid({ trips, onDelete }: { trips: Trip[]; onDelete: (trip: Trip) => void }) {
+  return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{trips.map((trip) => <article key={trip.id} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-sage-300 hover:shadow-soft"><a href={tripHref(trip)} className="block"><div className="mb-8 flex h-12 w-12 items-center justify-center rounded-xl bg-sage-50 text-sage-700"><MapPin /></div><h3 className="font-semibold">{trip.name}</h3>{destinationLabel(trip) && <p className="mt-1 truncate text-xs text-slate-500">{destinationLabel(trip)}</p>}<p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500"><CalendarDays size={13} />{trip.startDate} – {trip.endDate}</p><p className="mt-1 text-[11px] text-slate-400">{trip.timezone}</p></a><button onClick={() => onDelete(trip)} aria-label={`Delete ${trip.name}`} className="mt-5 flex items-center gap-1 text-xs text-slate-400 opacity-0 focus:opacity-100 hover:text-rose-600 group-hover:opacity-100"><Trash2 size={12} /> Delete</button></article>)}</div>;
+}
+
+export function TripList({ trips, onDelete }: { trips: Trip[]; onDelete: (trip: Trip) => void }) {
+  return <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">{trips.map((trip, index) => <article key={trip.id} className={`group flex min-w-0 items-center gap-3 px-4 py-4 hover:bg-sage-50/50 ${index ? "border-t border-slate-100" : ""}`}><a href={tripHref(trip)} className="flex min-w-0 flex-1 items-center gap-4"><div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sage-50 text-sage-700 sm:flex"><MapPin size={18} /></div><div className="min-w-0 flex-1"><h3 className="font-semibold text-slate-900">{trip.name}</h3>{destinationLabel(trip) && <p className="mt-0.5 break-words text-xs text-slate-500">{destinationLabel(trip)}</p>}<p className="mt-1 text-xs text-slate-500">{trip.startDate} – {trip.endDate} · {tripDurationDays(trip)} {tripDurationDays(trip) === 1 ? "day" : "days"}</p><p className="mt-0.5 text-[11px] text-slate-400">{trip.timezone}</p></div><ChevronRight className="shrink-0 text-slate-300" size={18} /></a><button onClick={() => onDelete(trip)} aria-label={`Delete ${trip.name}`} className="shrink-0 rounded-lg p-2 text-slate-300 opacity-0 focus:opacity-100 hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100"><Trash2 size={14} /></button></article>)}</div>;
+}

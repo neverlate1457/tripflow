@@ -1,0 +1,9 @@
+---
+import { TripPlanner } from '@/components/trip/TripPlanner';
+import '@/styles/global.css';
+const { id } = Astro.params;
+---
+<html lang="en">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="description" content="TripFlow visual travel itinerary planner" /><title>TripFlow · Planner</title></head>
+  <body><TripPlanner tripId={id ?? ''} client:load /></body>
+</html>

@@ -1,0 +1,32 @@
+# Dependencies / Build
+node_modules/
+dist/
+.astro/
+coverage/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Local data
+data/
+
+# Database
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# Secrets
+*.pem
+*.key
+credentials.json
+
+# Logs
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/

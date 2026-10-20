@@ -1,0 +1,30 @@
+CREATE TABLE `trip_day_contexts` (
+	`trip_id` text NOT NULL,
+	`date` text NOT NULL,
+	`start_name` text,
+	`start_formatted_address` text,
+	`start_latitude` real,
+	`start_longitude` real,
+	`start_provider` text,
+	`start_provider_place_id` text,
+	`start_timezone` text,
+	`base_name` text,
+	`base_formatted_address` text,
+	`base_latitude` real,
+	`base_longitude` real,
+	`base_provider` text,
+	`base_provider_place_id` text,
+	`base_timezone` text,
+	`end_name` text,
+	`end_formatted_address` text,
+	`end_latitude` real,
+	`end_longitude` real,
+	`end_provider` text,
+	`end_provider_place_id` text,
+	`end_timezone` text,
+	`created_at` text NOT NULL,
+	`updated_at` text NOT NULL,
+	FOREIGN KEY (`trip_id`) REFERENCES `trips`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `trip_day_contexts_trip_date_unique` ON `trip_day_contexts` (`trip_id`,`date`);

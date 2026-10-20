@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `candidates_trip_provider_place_unique` ON `candidates` (`trip_id`,`provider`,`place_id`);

@@ -1,0 +1,19 @@
+import { useState } from "react";
+import { X } from "lucide-react";
+import type { PlanningAIDebugTrace } from "@/services/planning-ai-debug";
+import { PlanningAITracePayload } from "./PlanningAITracePayload";
+
+export type { PlanningAIDebugTrace } from "@/services/planning-ai-debug";
+const order = ["request", "preprocessing", "temporalExtraction", "context", "providerRequest", "providerResult", "providerParsing", "providerRepair", "parsingValidation", "normalization", "temporalNormalization", "entityResolution", "routing", "toolPlan", "geographicReference", "geographicResolution", "clarificationCreated", "clarificationResolved", "discoveryAnchor", "providerDiscovery", "ranking", "travelRelevanceReranking", "discoveryResumed", "solverInput", "solverResult", "frontendRendering", "failure"];
+
+export function PlanningAIDebugPanel({ trace, loading, error, onRefresh, onClose }: { trace: PlanningAIDebugTrace | null; loading: boolean; error: string | null; onRefresh: () => void; onClose: () => void }) {
+  const [open, setOpen] = useState<Record<string, boolean>>({ request: true, preprocessing: true, temporalExtraction: true, temporalNormalization: true, routing: true });
+  const copy = (value: unknown) => void navigator.clipboard.writeText(JSON.stringify(value, null, 2));
+  return <aside className="fixed inset-y-4 right-[388px] z-[66] w-[min(620px,calc(100vw-404px))] overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-2xl" aria-label="AI Debug Trace">
+    <div className="flex items-center justify-between border-b px-4 py-3"><div><h2 className="text-sm font-semibold">AI Debug Trace</h2><p className="font-mono text-[9px] text-slate-500">{trace?.requestId ?? "No request trace"}</p></div><div className="flex gap-2"><button onClick={onRefresh} className="text-[10px] underline">Refresh</button>{trace && <button onClick={() => copy(trace)} className="text-[10px] underline">Copy full trace</button>}<button onClick={onClose} aria-label="Close debug trace"><X size={15}/></button></div></div>
+    <div className="h-[calc(100%-58px)] overflow-y-auto p-3">{loading && <p className="text-xs">Loading trace…</p>}{error && <p className="text-xs text-rose-700">{error}</p>}{!loading && !error && !trace && <p className="text-xs text-slate-500">Submit an Ask TripFlow request first.</p>}
+      {trace?.timeline?.length ? <section className="mb-3 rounded-lg border p-3"><h3 className="text-xs font-semibold">Execution timeline</h3><ol className="mt-2 space-y-2">{trace.timeline.map((event) => <li key={event.eventId} className="border-l-2 border-sage-300 pl-2 text-[10px]"><div className="font-semibold">{event.stage.replaceAll("_", " ")} · {event.status}</div><div className="text-slate-500">{event.sourceType} · {event.provider ?? "—"}{event.model ? ` / ${event.model}` : ""} · {event.durationMs} ms</div>{event.routingReason && <div className="text-slate-500">Routing decision: {event.routingReason}</div>}{event.failureStage && <div className="text-rose-700">Failure stage: {event.failureStage.replaceAll("_", " ")}</div>}{event.reason && <div>{event.reason}</div>}<PlanningAITracePayload event={event}/></li>)}</ol></section> : null}
+      {trace && order.filter((key) => key in trace.stages).map((key) => <section key={key} className="mb-2 rounded-lg border"><div className="flex items-center justify-between px-3 py-2"><button onClick={() => setOpen((value) => ({ ...value, [key]: !value[key] }))} className="text-left text-xs font-semibold capitalize">{key.replace(/([A-Z])/g, " $1")}</button><button onClick={() => copy(trace.stages[key])} className="text-[9px] underline">Copy section</button></div>{open[key] && <pre className="max-h-72 overflow-auto border-t bg-slate-950 p-3 text-[10px] leading-4 text-slate-100">{JSON.stringify(trace.stages[key], null, 2)}</pre>}</section>)}
+    </div>
+  </aside>;
+}

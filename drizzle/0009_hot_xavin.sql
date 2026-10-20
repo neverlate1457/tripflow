@@ -1,0 +1,1 @@
+ALTER TABLE `segment_preferences` ADD `duration_override_minutes` integer;

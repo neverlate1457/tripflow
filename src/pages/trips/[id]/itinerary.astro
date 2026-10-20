@@ -1,0 +1,9 @@
+---
+import { ItineraryOverview } from '@/components/itinerary/ItineraryOverview';
+import '@/styles/global.css';
+const { id } = Astro.params;
+---
+<html lang="en">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><meta name="description" content="TripFlow itinerary overview" /><title>TripFlow · Itinerary</title></head>
+  <body class="itinerary-page"><ItineraryOverview tripId={id ?? ''} client:load /></body>
+</html>
