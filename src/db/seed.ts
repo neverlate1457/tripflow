@@ -1,6 +1,8 @@
-import { demoCandidates, demoItems, demoTrip } from '../data/demo-trip';
+import { demoTrip } from '../data/demo-trip';
 import { SqliteTripRepository } from '../services/sqlite-trip-repository';
+import { seedDemoTrip } from './seed-demo';
 
+if (process.env.NODE_ENV === 'production') throw new Error('Demo seeding is disabled in production.');
 const repository = new SqliteTripRepository();
-await repository.saveTrip({ trip: demoTrip, items: demoItems, candidates: demoCandidates, segmentPreferences: [] });
-console.log(`Seeded ${demoTrip.name} (${demoTrip.id})`);
+const result = await seedDemoTrip(repository);
+console.log(`${result === 'seeded' ? 'Seeded' : 'Preserved existing'} ${demoTrip.name} (${demoTrip.id})`);
